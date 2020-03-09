@@ -31,6 +31,7 @@
 
 #define OBSTACLE_TYPE_NONE   0
 #define OBSTACLE_TYPE_BARREL 1
+#define OBSTACLE_TYPE_CAN    2
 
 #define PLAYER_Y 430
 
@@ -59,3 +60,7 @@ extern void Character_IncrementFrame();
 extern void Explosion_Init();
 extern void draw_Explosion(SDL_Surface* surface, int x, int y);
 extern bool Explosion_IncrementFrame();
+
+// obstacleImage.c
+extern void Obstacles_Init();
+extern void draw_Obstacle(SDL_Surface * surface, struct Obstacle *o);

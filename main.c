@@ -2,6 +2,7 @@
 #include "banner.h"
 #include "title.h"
 
+
 SDL_Surface* screen;
 SDL_Surface* title_image;
 bool run;
@@ -60,6 +61,7 @@ int main(int argc, char *argv[]) {
 	// initialize the sprites
 	Character_Init();
 	Explosion_Init();
+	Obstacles_Init();
 
 	// load the title
 	rwops = SDL_RWFromConstMem(title_bmp, sizeof(title_bmp) / sizeof(char));
@@ -68,6 +70,13 @@ int main(int argc, char *argv[]) {
 
 	// wait 2 seconds
 	sleep(2);
+
+	// set the first obstacle to be a barrel
+	// TODO remove
+	obstacles[0].type=OBSTACLE_TYPE_BARREL;
+	obstacles[0].x = 100;
+	obstacles[1].type=OBSTACLE_TYPE_CAN;
+	obstacles[1].x = 150;
 
 	// start the event loop
 	run = true;
@@ -118,6 +127,11 @@ int main(int argc, char *argv[]) {
 		// TODO remove
 		draw_Explosion(screen, 100, 100);
 		Explosion_IncrementFrame();
+
+		// draw some obstacles
+		// TODO remove
+		draw_Obstacle(screen, &obstacles[0]);
+		draw_Obstacle(screen, &obstacles[1]);
 
 		// draw the title
 		sdl_rect.x = 220;
