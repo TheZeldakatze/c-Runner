@@ -37,7 +37,7 @@
 
 struct Player {
 	int x;
-	int lives;
+	int lives, score, ticks_until_next_score;
 	
 };
 
@@ -46,6 +46,10 @@ struct Obstacle {
 	int y;
 	unsigned char type;
 };
+
+// main.c
+extern int getRandomInt(int limit);
+extern bool checkCollision(int x1, int y1, int w1, int h1, int x2, int y2, int w2, int h2);
 
 // BitmapFontRenderer.c
 extern void Font_Init();

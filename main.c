@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
 
 	// load the loading banner
 	// it has the dimensions of 320x60
-	SDL_RWops* rwops = SDL_RWFromConstMem(banner_bmp, sizeof(banner_bmp) / sizeof(char));
+	SDL_RWops* rwops = SDL_RWFromMem(banner_bmp, sizeof(banner_bmp) / sizeof(char));
 	SDL_Surface * banner = SDL_LoadBMP_RW(rwops,1);
 
 	sdl_rect2.x = 160;
@@ -70,13 +70,6 @@ int main(int argc, char *argv[]) {
 
 	// wait 2 seconds
 	sleep(2);
-
-	// set the first obstacle to be a barrel
-	// TODO remove
-	obstacles[0].type=OBSTACLE_TYPE_BARREL;
-	obstacles[0].x = 100;
-	obstacles[1].type=OBSTACLE_TYPE_CAN;
-	obstacles[1].x = 150;
 
 	// start the event loop
 	run = true;
@@ -112,6 +105,75 @@ int main(int argc, char *argv[]) {
 			SDL_WM_ToggleFullScreen(screen);
 		}
 
+		// the game routine
+		switch(state) {
+			case STATE_MAIN_MENU: {
+				// if space was pressed, start the game
+				if(keyPressed[SDLK_SPACE]) {
+					keyPressed[SDLK_SPACE] = false;
+					state = STATE_GAME;
+
+					// setup the game
+					player.lives = 3;
+				}
+
+				break;
+			}
+			case STATE_GAME: {
+				// move the player
+				if(keyPressed[SDLK_LEFT])
+					player.x--;
+				if(keyPressed[SDLK_RIGHT])
+					player.x++;
+
+				// increment the score
+				player.ticks_until_next_score--;
+				if(player.ticks_until_next_score <= 0) {
+					player.ticks_until_next_score = TICKS_PER_SECOND;
+					player.score++;
+				}
+
+				for(int i = 0; i<OBSTACLE_COUNT; i++) {
+
+					// the obstacles actually move torwards you
+					obstacles[i].y+=2;
+
+					// reset the obstacle, if it is not visible
+					if(obstacles[i].type == OBSTACLE_TYPE_NONE || obstacles[i].y > SCREEN_HEIGHT) {
+						obstacles[i].type = (unsigned char) getRandomInt(2);
+						obstacles[i].x = getRandomInt(SCREEN_WIDTH-32);
+						obstacles[i].y = -getRandomInt(100)-32;
+					}
+
+					// check for collision
+					if(obstacles[i].type != OBSTACLE_TYPE_NONE && checkCollision(player.x, PLAYER_Y, 36, 12, obstacles[i].x, obstacles[i].y, 32, 32))
+						state = STATE_ACCIDENT;
+				}
+				break;
+			}
+			case STATE_ACCIDENT: {
+				if(Explosion_IncrementFrame()) {
+					state = STATE_GAME;
+					player.lives--;
+					if(player.lives <= 0)
+						state = STATE_GAME_OVER;
+
+					// reset all obstacles
+					for(int i = 0; i<OBSTACLE_COUNT; i++)
+						obstacles[i].type = OBSTACLE_TYPE_NONE;
+				}
+				break;
+			}
+			case STATE_GAME_OVER: {
+				// if space was pressed, go to the main menu
+				if(keyPressed[SDLK_SPACE]) {
+					keyPressed[SDLK_SPACE] = false;
+					state = STATE_MAIN_MENU;
+				}
+				break;
+			}
+		}
+
 		// draw the background
 		sdl_rect.x = 0;
 		sdl_rect.y = 0;
@@ -119,24 +181,67 @@ int main(int argc, char *argv[]) {
 		sdl_rect.h = SCREEN_HEIGHT;
 		SDL_FillRect(screen,&sdl_rect,SDL_MapRGB(screen->format,150,150,150));
 
+		// the graphics routine
+		switch(state) {
+			case STATE_MAIN_MENU: {
+
+				// draw the title
+				sdl_rect.x = 221;
+				sdl_rect.y = 10;
+				SDL_BlitSurface(title_image, (void*) 0, screen, &sdl_rect);
+
+				Font_DrawString(screen, 236, 100, "Press Space to Start!");
+
+				break;
+			}
+
+			case STATE_GAME: {
+				for(int i = 0; i<OBSTACLE_COUNT; i++) {
+					if(obstacles[i].type != OBSTACLE_TYPE_NONE)
+						draw_Obstacle(screen, &obstacles[i]);
+
+				}
+
+				// draw the score
+				char score_s[50]; // TODO this could create a buffer overflow
+				sprintf(score_s, "Score: %d", player.score);
+				int length = strlen(score_s) + 1;
+				Font_DrawString(screen, 10, 10, score_s);
+
+				// draw the lives
+				sprintf(score_s, "Lives: %d", player.lives);
+				length = strlen(score_s) + 1;
+				Font_DrawString(screen, 10, 18, score_s);
+
+				break;
+			}
+
+			case STATE_ACCIDENT: {
+				for(int i = 0; i<OBSTACLE_COUNT; i++) {
+					if(obstacles[i].type != OBSTACLE_TYPE_NONE)
+						draw_Obstacle(screen, &obstacles[i]);
+				}
+				break;
+			}
+			case STATE_GAME_OVER: {
+				// draw the score
+				char score_s[50]; // TODO this could create a buffer overflow
+				sprintf(score_s, "Score: %d", player.score);
+				int length = strlen(score_s) + 1;
+				Font_DrawString(screen, SCREEN_WIDTH /2  - length * 4, 180, score_s);
+			}
+		}
+
 		// draw the character
-		draw_Character(screen, player.x, PLAYER_Y);
-		Character_IncrementFrame();
-
-		// draw an explosion
-		// TODO remove
-		draw_Explosion(screen, 100, 100);
-		Explosion_IncrementFrame();
-
-		// draw some obstacles
-		// TODO remove
-		draw_Obstacle(screen, &obstacles[0]);
-		draw_Obstacle(screen, &obstacles[1]);
-
-		// draw the title
-		sdl_rect.x = 220;
-		sdl_rect.y = 10;
-		SDL_BlitSurface(title_image, (void*) 0, screen, &sdl_rect);
+		if(state != STATE_GAME_OVER) {
+			if(state != STATE_ACCIDENT) {
+			draw_Character(screen, player.x, PLAYER_Y);
+				Character_IncrementFrame();
+			}
+			else
+				// draw an explosion
+				draw_Explosion(screen, player.x, PLAYER_Y);
+		}
 
 		// draw the screen
 		SDL_Flip(screen);

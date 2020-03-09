@@ -41,4 +41,5 @@ bool Explosion_IncrementFrame() {
 
 		return false;
 	}
+	return false;
 }
