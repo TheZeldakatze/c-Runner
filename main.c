@@ -63,6 +63,9 @@ int main(int argc, char *argv[]) {
 	Explosion_Init();
 	Obstacles_Init();
 
+	// set the correct position of the character
+	player.x = SCREEN_WIDTH / 2-6;
+
 	// load the title
 	rwops = SDL_RWFromConstMem(title_bmp, sizeof(title_bmp) / sizeof(char));
 	title_image = SDL_LoadBMP_RW(rwops,1);
@@ -136,17 +139,17 @@ int main(int argc, char *argv[]) {
 				for(int i = 0; i<OBSTACLE_COUNT; i++) {
 
 					// the obstacles actually move torwards you
-					obstacles[i].y+=2;
+					obstacles[i].y+=3;
 
 					// reset the obstacle, if it is not visible
 					if(obstacles[i].type == OBSTACLE_TYPE_NONE || obstacles[i].y > SCREEN_HEIGHT) {
 						obstacles[i].type = (unsigned char) getRandomInt(2);
 						obstacles[i].x = getRandomInt(SCREEN_WIDTH-32);
-						obstacles[i].y = -getRandomInt(100)-32;
+						obstacles[i].y = -getRandomInt(200)-32;
 					}
 
 					// check for collision
-					if(obstacles[i].type != OBSTACLE_TYPE_NONE && checkCollision(player.x, PLAYER_Y, 36, 12, obstacles[i].x, obstacles[i].y, 32, 32))
+					if(obstacles[i].type != OBSTACLE_TYPE_NONE && checkCollision(player.x, PLAYER_Y, 12, 36, obstacles[i].x, obstacles[i].y, 32, 32))
 						state = STATE_ACCIDENT;
 				}
 				break;
@@ -169,6 +172,7 @@ int main(int argc, char *argv[]) {
 				if(keyPressed[SDLK_SPACE]) {
 					keyPressed[SDLK_SPACE] = false;
 					state = STATE_MAIN_MENU;
+					player.x = SCREEN_WIDTH / 2-6;
 				}
 				break;
 			}
@@ -190,7 +194,7 @@ int main(int argc, char *argv[]) {
 				sdl_rect.y = 10;
 				SDL_BlitSurface(title_image, (void*) 0, screen, &sdl_rect);
 
-				Font_DrawString(screen, 236, 100, "Press Space to Start!");
+				Font_DrawString(screen, 236, 100, "Press Space to Start");
 
 				break;
 			}
