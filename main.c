@@ -195,7 +195,8 @@ int main(int argc, char *argv[]) {
 				sdl_rect.y = 10;
 				SDL_BlitSurface(title_image, (void*) 0, screen, &sdl_rect);
 
-				Font_DrawString(screen, 236, 100, "Press Space to Start");
+				Font_DrawString(screen, 236, 100, "Press Space to start");
+				Font_DrawString(screen, 236, 120, "Press ESCape to quit");
 
 				break;
 			}
