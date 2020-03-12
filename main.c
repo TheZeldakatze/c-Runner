@@ -125,9 +125,9 @@ int main(int argc, char *argv[]) {
 			}
 			case STATE_GAME: {
 				// move the player
-				if(keyPressed[SDLK_LEFT])
+				if(keyPressed[SDLK_LEFT] && player.x > 0)
 					player.x-=3;
-				if(keyPressed[SDLK_RIGHT])
+				if(keyPressed[SDLK_RIGHT] && player.x < SCREEN_WIDTH - 12)
 					player.x+=3;
 
 				// increment the score
@@ -211,12 +211,10 @@ int main(int argc, char *argv[]) {
 				// draw the score
 				char score_s[50]; // TODO this could create a buffer overflow
 				sprintf(score_s, "Score: %d", player.score);
-				int length = strlen(score_s) + 1;
 				Font_DrawString(screen, 10, 10, score_s);
 
 				// draw the lives
 				sprintf(score_s, "Lives: %d", player.lives);
-				length = strlen(score_s) + 1;
 				Font_DrawString(screen, 10, 20, score_s);
 
 				break;
