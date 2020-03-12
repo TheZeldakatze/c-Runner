@@ -27,7 +27,7 @@
 #define SCREEN_WIDTH 640
 #define SCREEN_HEIGHT 480
 
-#define OBSTACLE_COUNT 20
+#define OBSTACLE_COUNT 15
 
 #define OBSTACLE_TYPE_NONE   0
 #define OBSTACLE_TYPE_BARREL 1
@@ -43,7 +43,7 @@ struct Player {
 
 struct Obstacle {
 	int x;
-	int y;
+	float y;
 	unsigned char type;
 };
 

@@ -118,6 +118,7 @@ int main(int argc, char *argv[]) {
 
 					// setup the game
 					player.lives = 3;
+					player.score = 0;
 				}
 
 				break;
@@ -125,9 +126,9 @@ int main(int argc, char *argv[]) {
 			case STATE_GAME: {
 				// move the player
 				if(keyPressed[SDLK_LEFT])
-					player.x--;
+					player.x-=3;
 				if(keyPressed[SDLK_RIGHT])
-					player.x++;
+					player.x+=3;
 
 				// increment the score
 				player.ticks_until_next_score--;
@@ -139,13 +140,13 @@ int main(int argc, char *argv[]) {
 				for(int i = 0; i<OBSTACLE_COUNT; i++) {
 
 					// the obstacles actually move torwards you
-					obstacles[i].y+=3;
+					obstacles[i].y+=2 + (player.score / 60.0);
 
 					// reset the obstacle, if it is not visible
 					if(obstacles[i].type == OBSTACLE_TYPE_NONE || obstacles[i].y > SCREEN_HEIGHT) {
 						obstacles[i].type = (unsigned char) getRandomInt(2);
 						obstacles[i].x = getRandomInt(SCREEN_WIDTH-32);
-						obstacles[i].y = -getRandomInt(200)-32;
+						obstacles[i].y = -getRandomInt(300)-32;
 					}
 
 					// check for collision
@@ -215,7 +216,7 @@ int main(int argc, char *argv[]) {
 				// draw the lives
 				sprintf(score_s, "Lives: %d", player.lives);
 				length = strlen(score_s) + 1;
-				Font_DrawString(screen, 10, 18, score_s);
+				Font_DrawString(screen, 10, 20, score_s);
 
 				break;
 			}
@@ -228,11 +229,15 @@ int main(int argc, char *argv[]) {
 				break;
 			}
 			case STATE_GAME_OVER: {
+				Font_DrawString(screen, SCREEN_WIDTH /2  - 8 * 4, 150, "Game Over");
+
 				// draw the score
 				char score_s[50]; // TODO this could create a buffer overflow
 				sprintf(score_s, "Score: %d", player.score);
 				int length = strlen(score_s) + 1;
 				Font_DrawString(screen, SCREEN_WIDTH /2  - length * 4, 180, score_s);
+
+				Font_DrawString(screen, SCREEN_WIDTH / 2 - 23 * 4, 200, "Press Space to continue");
 			}
 		}
 
